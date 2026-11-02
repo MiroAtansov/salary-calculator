@@ -1,0 +1,57 @@
+.figure {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.bar {
+  display: flex;
+  gap: 2px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--line);
+}
+
+.segment {
+  flex-basis: 0;
+  min-width: 3px;
+  transition: flex-grow 240ms ease-out;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.itemLabel {
+  color: var(--ink);
+}
+
+.share {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment {
+    transition: none;
+  }
+}

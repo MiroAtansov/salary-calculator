@@ -1,0 +1,111 @@
+:root {
+  --bg: #e8ecf1;
+  --surface: #ffffff;
+  --sunken: #dfe5ec;
+  --field: #ffffff;
+  --ink: #142030;
+  --ink-soft: #33415a;
+  --muted: #5a6679;
+  --faint: #98a2b2;
+  --line: #e1e6ed;
+  --line-strong: #c7d0dc;
+  --accent: #2a52cf;
+  --accent-wash: #e9eefc;
+  --accent-ring: rgb(42 82 207 / 0.22);
+  --danger: #b4302b;
+
+  /* Cost layers, from what the employee keeps to what the company earns. */
+  --tone-salary: #2a52cf;
+  --tone-deductions: #92a8ee;
+  --tone-employer: #4d6a86;
+  --tone-extras: #6fa9a6;
+  --tone-operations: #b6c0cd;
+  --tone-markup: #d9960d;
+
+  --shadow: 0 1px 2px rgb(20 32 48 / 0.06), 0 4px 16px rgb(20 32 48 / 0.05);
+  --radius: 14px;
+  --radius-sm: 8px;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.5rem;
+  --text-display-sm: clamp(2rem, 4vw, 2.5rem);
+  --text-display: clamp(2.5rem, 6vw, 3.75rem);
+
+  color-scheme: light;
+  font-family: 'IBM Plex Sans Variable', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1520;
+    --surface: #17202d;
+    --sunken: #111924;
+    --field: #111924;
+    --ink: #e5ebf3;
+    --ink-soft: #c1cbd8;
+    --muted: #93a0b2;
+    --faint: #5d6a7c;
+    --line: #253142;
+    --line-strong: #344256;
+    --accent: #7d9cff;
+    --accent-wash: rgb(125 156 255 / 0.12);
+    --accent-ring: rgb(125 156 255 / 0.3);
+    --danger: #ff8a80;
+
+    --tone-salary: #6f90fb;
+    --tone-deductions: #3d5296;
+    --tone-employer: #7f9bb8;
+    --tone-extras: #5f9f9b;
+    --tone-operations: #4a5668;
+    --tone-markup: #f0ac25;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3,
+p {
+  text-wrap: pretty;
+}
+
+[data-tone='salary'] {
+  background: var(--tone-salary);
+}
+[data-tone='deductions'] {
+  background: var(--tone-deductions);
+}
+[data-tone='employer'] {
+  background: var(--tone-employer);
+}
+[data-tone='extras'] {
+  background: var(--tone-extras);
+}
+[data-tone='operations'] {
+  background: var(--tone-operations);
+}
+[data-tone='markup'] {
+  background: var(--tone-markup);
+}
