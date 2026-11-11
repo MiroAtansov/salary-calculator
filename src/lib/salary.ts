@@ -1,3 +1,4 @@
+import { hourlyRate, type HourlyRate } from './hourly'
 import { round2 } from './money'
 import { STATUTORY_2026, type PricingRates, type StatutoryRates } from './rates'
 
@@ -60,6 +61,8 @@ export interface ProfileCost {
   costPerProfile: number
   annualPayrollCost: number
   annualCostPerProfile: number
+  /** Hourly rate from the cost before markup. */
+  hourly: HourlyRate
 }
 
 /** "Net calculator" B3:B11 and "FLC" B3:B6 — monthly cost of one profile from its gross salary. */
@@ -88,5 +91,6 @@ export function profileCost(
     costPerProfile,
     annualPayrollCost: payrollCost * 12,
     annualCostPerProfile: costPerProfile * 12,
+    hourly: hourlyRate(costPerProfile - markup, rates),
   }
 }

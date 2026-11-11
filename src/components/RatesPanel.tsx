@@ -1,5 +1,5 @@
 import { formatEur, formatPercent, round2 } from '../lib/money'
-import { RATE_PRESETS, STATUTORY_2026, type PricingRates } from '../lib/rates'
+import { PRESET_KEYS, RATE_PRESETS, STATUTORY_2026, type PricingRates } from '../lib/rates'
 import { NumberField } from './NumberField'
 import styles from './RatesPanel.module.css'
 
@@ -10,22 +10,39 @@ interface RatesPanelProps {
 
 const s = STATUTORY_2026
 
+const pick = (rates: PricingRates) => Object.fromEntries(PRESET_KEYS.map((key) => [key, rates[key]]))
+
 /** Editable pricing assumptions, shared by both calculators. */
 export function RatesPanel({ rates, onChange }: RatesPanelProps) {
   const set = (key: keyof PricingRates) => (value: number | null) => onChange({ ...rates, [key]: value ?? 0 })
-  const setPercent = (key: 'overheadRate' | 'markupRate') => (value: number | null) =>
+  const setPercent = (key: 'overheadRate' | 'markupRate' | 'hourlyMarkupRate') => (value: number | null) =>
     onChange({ ...rates, [key]: round2(value ?? 0) / 100 })
   const activePreset = RATE_PRESETS.find((p) =>
-    (Object.keys(p.rates) as (keyof PricingRates)[]).every((key) => p.rates[key] === rates[key]),
+    PRESET_KEYS.every((key) => p.rates[key] === rates[key]),
   )
 
   return (
     <details className={styles.panel}>
       <summary className={styles.summary}>
-        <span className={styles.title}>Pricing assumptions</span>
-        <span className={styles.current}>
-          {activePreset ? activePreset.label : 'Custom'}: {formatPercent(rates.overheadRate)} overhead,{' '}
-          {formatPercent(rates.markupRate)} markup
+        <span className={styles.icon} aria-hidden="true">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <path d="M3 5h8M15 5h2M3 10h2M9 10h8M3 15h10M17 15h0" />
+            <circle cx="13" cy="5" r="2" />
+            <circle cx="7" cy="10" r="2" />
+            <circle cx="15" cy="15" r="2" />
+          </svg>
+        </span>
+        <span className={styles.text}>
+          <span className={styles.title}>Pricing assumptions</span>
+          <span className={styles.current}>
+            {activePreset ? activePreset.label : 'Custom'}: {formatPercent(rates.overheadRate)} overhead,{' '}
+            {formatPercent(rates.markupRate)} markup, {formatPercent(rates.hourlyMarkupRate)} hourly markup
+          </span>
+        </span>
+        <span className={styles.action} aria-hidden="true">
+          <span className={styles.whenClosed}>Edit</span>
+          <span className={styles.whenOpen}>Close</span>
+          <span className={styles.chevron} />
         </span>
       </summary>
 
@@ -37,7 +54,7 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
               type="button"
               className={styles.preset}
               aria-pressed={activePreset?.id === preset.id}
-              onClick={() => onChange(preset.rates)}
+              onClick={() => onChange({ ...rates, ...pick(preset.rates) })}
             >
               {preset.label}
               <span>
@@ -64,6 +81,25 @@ export function RatesPanel({ rates, onChange }: RatesPanelProps) {
             unit="%"
             value={round2(rates.markupRate * 100)}
             onChange={setPercent('markupRate')}
+            min={0}
+          />
+        </div>
+
+        <div className={styles.grid}>
+          <NumberField
+            label="Hours per month"
+            unit="h"
+            value={rates.hoursPerMonth}
+            onChange={set('hoursPerMonth')}
+            min={0}
+            hint="Hourly cost = monthly cost before markup / these hours"
+          />
+          <NumberField label="Hours per day" unit="h" value={rates.hoursPerDay} onChange={set('hoursPerDay')} min={0} />
+          <NumberField
+            label="Hourly markup"
+            unit="%"
+            value={round2(rates.hourlyMarkupRate * 100)}
+            onChange={setPercent('hourlyMarkupRate')}
             min={0}
           />
         </div>

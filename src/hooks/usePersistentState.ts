@@ -22,3 +22,12 @@ export function usePersistentState<T>(key: string, initial: T | (() => T)) {
 
   return [value, setValue] as const
 }
+
+/** Writes a value where `usePersistentState(key)` will find it on its next mount. */
+export function writeStored<T>(key: string, value: T) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // Storage blocked; nothing to keep.
+  }
+}

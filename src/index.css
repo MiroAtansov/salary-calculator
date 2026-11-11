@@ -109,3 +109,18 @@ p {
 [data-tone='markup'] {
   background: var(--tone-markup);
 }
+
+@page {
+  size: A4 landscape;
+  margin: 14mm;
+}
+
+@media print {
+  #root {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+  }
+}

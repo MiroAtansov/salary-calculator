@@ -79,3 +79,9 @@
     padding: 22px 18px 24px;
   }
 }
+
+.hourlyNote {
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}

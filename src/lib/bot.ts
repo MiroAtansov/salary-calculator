@@ -1,4 +1,6 @@
 import { employerSocialSecurity } from './salary'
+import { ONE_MONTH, type Duration } from './duration'
+import { hourlyRate, type HourlyRate } from './hourly'
 import { STATUTORY_2026, type PricingRates, type StatutoryRates } from './rates'
 
 /** One column of the BOT calculator: a position staffed by one or more FTEs. Amounts are monthly totals for all FTEs. */
@@ -14,6 +16,8 @@ export interface Position {
   equipment: number
   /** Previous-month correction: holiday allowance, overtime, new hires, sick leave, vouchers. */
   adjustment: number
+  /** How long the position is part of the offer. */
+  duration: Duration
 }
 
 export interface PositionCost {
@@ -28,6 +32,8 @@ export interface PositionCost {
   costPerProfile: number
   costPerFte: number
   invoiceAmount: number
+  /** Hourly rate of one FTE, from the cost before markup. */
+  hourly: HourlyRate
 }
 
 const TOTAL_KEYS = [
@@ -97,6 +103,7 @@ export function positionCost(
     costPerProfile,
     costPerFte: ftes > 0 ? costPerProfile / ftes : 0,
     invoiceAmount: costPerProfile + adjustment,
+    hourly: hourlyRate(ftes > 0 ? (costPerProfile - markup) / ftes : 0, rates),
   }
 }
 
@@ -135,6 +142,31 @@ export function createPosition(overrides: Partial<Position> = {}): Position {
     accommodation: 0,
     equipment: 0,
     adjustment: 0,
+    duration: ONE_MONTH,
     ...overrides,
   }
 }
+
+/** Positions saved by an older version get any newer fields from the defaults. */
+export function normalizePosition(stored: Partial<Position>): Position {
+  return { ...createPosition(), ...stored }
+}
+
+export type BreakdownKey = Exclude<keyof TeamTotals, 'ftes'>
+
+/** Rows of the per-position breakdown, in the same order as the BOT spreadsheet. */
+export const BREAKDOWN_ROWS: { key: BreakdownKey; label: string; strong?: boolean }[] = [
+  { key: 'baseSalary', label: 'Base salary' },
+  { key: 'benefits', label: 'Benefits' },
+  { key: 'socialSecurity', label: 'Social security' },
+  { key: 'insurance', label: 'Health and other insurance' },
+  { key: 'travel', label: 'Travel expenses' },
+  { key: 'accommodation', label: 'Accommodation' },
+  { key: 'equipment', label: 'Equipment' },
+  { key: 'rent', label: 'Rent and telecoms' },
+  { key: 'overhead', label: 'Corporate overhead' },
+  { key: 'markup', label: 'Markup' },
+  { key: 'costPerProfile', label: 'Total monthly cost', strong: true },
+  { key: 'adjustment', label: 'Previous-month adjustment' },
+  { key: 'invoiceAmount', label: 'Amount for invoice', strong: true },
+]

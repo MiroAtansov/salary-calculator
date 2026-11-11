@@ -1,8 +1,9 @@
-import { useRef, type KeyboardEvent } from 'react'
-import { BotCalculator } from './features/bot/BotCalculator'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { BotCalculator, SharedBotCalculator } from './features/bot/BotCalculator'
 import { SalaryCalculator } from './features/salary/SalaryCalculator'
-import { usePersistentState } from './hooks/usePersistentState'
-import { STANDARD_RATES, type PricingRates } from './lib/rates'
+import { usePersistentState, writeStored } from './hooks/usePersistentState'
+import { normalizeRates, STANDARD_RATES, type PricingRates } from './lib/rates'
+import { decodeShare, shareTokenFromHash, type SharedOffer } from './lib/share'
 import styles from './App.module.css'
 
 const TABS = [
@@ -12,10 +13,51 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]['id']
 
+function clearHash() {
+  history.replaceState(null, '', window.location.pathname + window.location.search)
+}
+
 export default function App() {
   const [tab, setTab] = usePersistentState<TabId>('app.tab', 'profile')
-  const [rates, setRates] = usePersistentState<PricingRates>('app.rates', STANDARD_RATES)
+  const [storedRates, setRates] = usePersistentState<PricingRates>('app.rates', STANDARD_RATES)
+  const rates = normalizeRates(storedRates)
+  const [shared, setShared] = useState<SharedOffer | null>(null)
+  const [linkError, setLinkError] = useState(false)
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  // A link from "Send for approval" carries the whole calculation in the hash.
+  useEffect(() => {
+    let cancelled = false
+    async function open() {
+      const token = shareTokenFromHash(window.location.hash)
+      if (!token) return
+      const offer = await decodeShare(token)
+      if (cancelled) return
+      setLinkError(offer === null)
+      setShared(offer)
+      if (offer) setTab('bot')
+    }
+    void open()
+    window.addEventListener('hashchange', open)
+    return () => {
+      cancelled = true
+      window.removeEventListener('hashchange', open)
+    }
+  }, [setTab])
+
+  function closeShared() {
+    setShared(null)
+    clearHash()
+  }
+
+  function saveShared() {
+    if (!shared) return
+    writeStored('bot.positions', shared.positions)
+    writeStored('bot.items', shared.items)
+    writeStored('bot.meta', shared.meta)
+    setRates(shared.rates)
+    closeShared()
+  }
 
   // Arrow keys move between tabs, as in the WAI-ARIA tabs pattern.
   function onTabKeyDown(e: KeyboardEvent) {
@@ -55,9 +97,26 @@ export default function App() {
         </div>
       </header>
 
+      {linkError && (
+        <p className={styles.linkError} role="alert">
+          This link could not be opened. It may be incomplete; ask for it to be sent again.{' '}
+          <button
+            type="button"
+            onClick={() => {
+              setLinkError(false)
+              clearHash()
+            }}
+          >
+            Dismiss
+          </button>
+        </p>
+      )}
+
       <main id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
         {tab === 'profile' ? (
           <SalaryCalculator rates={rates} onRatesChange={setRates} />
+        ) : shared ? (
+          <SharedBotCalculator shared={shared} onChange={setShared} onSave={saveShared} onClose={closeShared} />
         ) : (
           <BotCalculator rates={rates} onRatesChange={setRates} />
         )}

@@ -1,25 +1,6 @@
-import { lineAmounts, type TeamCost, type TeamTotals } from '../../lib/bot'
-import { formatEurWhole } from '../../lib/money'
+import { BREAKDOWN_ROWS, lineAmounts, type TeamCost } from '../../lib/bot'
+import { formatEur, formatEurWhole } from '../../lib/money'
 import styles from './BreakdownTable.module.css'
-
-type RowKey = Exclude<keyof TeamTotals, 'ftes'>
-
-// Same rows, in the same order, as the BOT spreadsheet.
-const ROWS: { key: RowKey; label: string; strong?: boolean }[] = [
-  { key: 'baseSalary', label: 'Base salary' },
-  { key: 'benefits', label: 'Benefits' },
-  { key: 'socialSecurity', label: 'Social security' },
-  { key: 'insurance', label: 'Health and other insurance' },
-  { key: 'travel', label: 'Travel expenses' },
-  { key: 'accommodation', label: 'Accommodation' },
-  { key: 'equipment', label: 'Equipment' },
-  { key: 'rent', label: 'Rent and telecoms' },
-  { key: 'overhead', label: 'Corporate overhead' },
-  { key: 'markup', label: 'Markup' },
-  { key: 'costPerProfile', label: 'Total monthly cost', strong: true },
-  { key: 'adjustment', label: 'Previous-month adjustment' },
-  { key: 'invoiceAmount', label: 'Amount for invoice', strong: true },
-]
 
 export function BreakdownTable({ team, titles }: { team: TeamCost; titles: string[] }) {
   const columns = team.positions.map((p) => ({ id: p.position.id, amounts: lineAmounts(p) }))
@@ -27,7 +8,7 @@ export function BreakdownTable({ team, titles }: { team: TeamCost; titles: strin
   return (
     <section className={styles.section} aria-labelledby="breakdown-heading">
       <h2 id="breakdown-heading" className={styles.heading}>
-        Breakdown by position
+        Monthly breakdown by position
       </h2>
       <div className={styles.scroller} tabIndex={0} role="region" aria-labelledby="breakdown-heading">
         <table className={styles.table}>
@@ -56,7 +37,7 @@ export function BreakdownTable({ team, titles }: { team: TeamCost; titles: strin
             </tr>
           </thead>
           <tbody>
-            {ROWS.map((row) => (
+            {BREAKDOWN_ROWS.map((row) => (
               <tr key={row.key} data-strong={row.strong || undefined}>
                 <th scope="row" className={styles.rowHead}>
                   {row.label}
@@ -65,6 +46,19 @@ export function BreakdownTable({ team, titles }: { team: TeamCost; titles: strin
                   <td key={c.id}>{formatEurWhole(c.amounts[row.key])}</td>
                 ))}
                 <td className={styles.totalCol}>{formatEurWhole(team.totals[row.key])}</td>
+              </tr>
+            ))}
+            {(['hourlyCost', 'hourlyRate'] as const).map((key) => (
+              <tr key={key} className={styles.hourlyRow}>
+                <th scope="row" className={styles.rowHead}>
+                  {key === 'hourlyCost' ? 'Hourly cost per FTE' : 'Hourly rate per FTE'}
+                </th>
+                {team.positions.map((p) => (
+                  <td key={p.position.id}>{formatEur(p.hourly[key])}</td>
+                ))}
+                <td className={styles.totalCol} aria-label="Not summed">
+                  –
+                </td>
               </tr>
             ))}
           </tbody>

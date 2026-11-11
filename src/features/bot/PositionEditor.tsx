@@ -1,12 +1,19 @@
 import { useId } from 'react'
+import { DurationField } from '../../components/DurationField'
+import { PencilIcon, TrashIcon } from '../../components/Icons'
 import { NumberField } from '../../components/NumberField'
 import { Stepper } from '../../components/Stepper'
 import { estimateSocialSecurity, type Position, type PositionCost } from '../../lib/bot'
-import { formatEur } from '../../lib/money'
+import { formatDuration } from '../../lib/duration'
+import { formatEur, formatPercent } from '../../lib/money'
+import type { OfferLine } from '../../lib/offer'
+import type { PricingRates } from '../../lib/rates'
 import styles from './PositionEditor.module.css'
 
 interface PositionEditorProps {
   cost: PositionCost
+  line: OfferLine
+  rates: PricingRates
   fallbackTitle: string
   onChange: (patch: Partial<Position>) => void
   onRemove?: () => void
@@ -19,7 +26,7 @@ const EXTRAS = [
   { key: 'adjustment', label: 'Previous-month adjustment' },
 ] as const
 
-export function PositionEditor({ cost, fallbackTitle, onChange, onRemove }: PositionEditorProps) {
+export function PositionEditor({ cost, line, rates, fallbackTitle, onChange, onRemove }: PositionEditorProps) {
   const titleId = useId()
   const { position } = cost
   const estimate = estimateSocialSecurity(position.ftes, position.baseSalary)
@@ -31,15 +38,19 @@ export function PositionEditor({ cost, fallbackTitle, onChange, onRemove }: Posi
         <label htmlFor={titleId} className={styles.visuallyHidden}>
           Position title
         </label>
-        <input
-          id={titleId}
-          className={styles.title}
-          value={position.title}
-          placeholder={fallbackTitle}
-          onChange={(e) => onChange({ title: e.target.value })}
-        />
+        <label htmlFor={titleId} className={styles.titleField}>
+          <input
+            id={titleId}
+            className={styles.title}
+            value={position.title}
+            placeholder={fallbackTitle}
+            onChange={(e) => onChange({ title: e.target.value })}
+          />
+          <PencilIcon />
+        </label>
         {onRemove && (
           <button type="button" className={styles.remove} onClick={onRemove}>
+            <TrashIcon />
             Remove
           </button>
         )}
@@ -74,6 +85,30 @@ export function PositionEditor({ cost, fallbackTitle, onChange, onRemove }: Posi
         />
       </div>
 
+      <div className={styles.durationRow}>
+        <DurationField
+          label="Duration in the offer"
+          amount={position.duration.amount}
+          unit={position.duration.unit}
+          onChange={(amount, unit) => onChange({ duration: { amount, unit } })}
+          hint={
+            position.duration.unit === 'month'
+              ? 'Priced at the monthly price'
+              : `Priced at the hourly rate, ${rates.hoursPerDay} h per day`
+          }
+        />
+        <dl className={styles.hourly}>
+          <div>
+            <dt>Hourly cost per FTE</dt>
+            <dd>{formatEur(cost.hourly.hourlyCost)}</dd>
+          </div>
+          <div>
+            <dt>Hourly rate, {formatPercent(rates.hourlyMarkupRate)} markup</dt>
+            <dd>{formatEur(cost.hourly.hourlyRate)}</dd>
+          </div>
+        </dl>
+      </div>
+
       <details className={styles.extras} open={extrasInUse > 0 || undefined}>
         <summary>
           Travel, equipment and adjustments
@@ -100,8 +135,12 @@ export function PositionEditor({ cost, fallbackTitle, onChange, onRemove }: Posi
           <strong>{formatEur(cost.costPerFte)}</strong>
         </div>
         <div>
-          <span>Amount for invoice</span>
+          <span>Monthly invoice</span>
           <strong>{formatEur(cost.invoiceAmount)}</strong>
+        </div>
+        <div>
+          <span>Offer, {formatDuration(position.duration)}</span>
+          <strong>{formatEur(line.revenue)}</strong>
         </div>
       </footer>
     </article>

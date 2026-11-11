@@ -94,3 +94,164 @@
     position: static;
   }
 }
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 320px));
+  gap: 14px;
+}
+
+.lines {
+  display: grid;
+  gap: 32px;
+}
+
+.sectionNote {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.offerStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: -8px 0 0;
+}
+
+.offerStats div {
+  display: grid;
+  gap: 2px;
+}
+
+.offerStats dt {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.offerStats dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.exports {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.exportsHeading {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.exportRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exportLabel {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.exportNote {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.exportButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.primary,
+.secondary {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.primary:hover {
+  filter: brightness(1.08);
+}
+
+.secondary {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+}
+
+.secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.exports > .primary {
+  margin-top: 6px;
+  padding: 11px 14px;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+.banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-wash);
+}
+
+.banner p {
+  margin: 0;
+}
+
+.bannerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.bannerNote {
+  grid-column: 1 / -1;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .banner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

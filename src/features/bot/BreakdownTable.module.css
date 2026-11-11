@@ -83,3 +83,16 @@
 .table tbody tr:last-child td {
   border-bottom: 0;
 }
+
+.table tr.hourlyRow > * {
+  color: var(--muted);
+}
+
+/* The hourly rows follow the bold "Amount for invoice" row. */
+.table tr[data-strong] + tr.hourlyRow > * {
+  border-top: 1px solid var(--line-strong);
+}
+
+.left {
+  text-align: left !important;
+}

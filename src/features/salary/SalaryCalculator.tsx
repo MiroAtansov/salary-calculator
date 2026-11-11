@@ -74,7 +74,19 @@ export function SalaryCalculator({ rates, onRatesChange }: SalaryCalculatorProps
               <dt>Payroll cost per year</dt>
               <dd>{formatEur(cost.annualPayrollCost)}</dd>
             </div>
+            <div>
+              <dt>Hourly cost</dt>
+              <dd>{formatEur(cost.hourly.hourlyCost)}</dd>
+            </div>
+            <div>
+              <dt>Hourly rate, {formatPercent(rates.hourlyMarkupRate)} markup</dt>
+              <dd>{formatEur(cost.hourly.hourlyRate)}</dd>
+            </div>
           </dl>
+          <p className={styles.hourlyNote}>
+            Hourly cost is the price before markup ({formatEur(cost.costPerProfile - cost.markup)}) over{' '}
+            {rates.hoursPerMonth} hours a month.
+          </p>
         </div>
 
         <BuildUpBar
